@@ -17,3 +17,14 @@ enum CurrencyType {
   radianitePoints,
   unknown,
 }
+
+enum EntitlementItemId {
+  agents,
+  contracts,
+  sprays,
+  gunBuddies,
+  cards,
+  skins,
+  skinChromas,
+  titles
+}
