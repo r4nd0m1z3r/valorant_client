@@ -1,3 +1,5 @@
+import 'package:valorant_client/src/enums.dart';
+
 import 'helpers.dart';
 import 'models/asset_id.dart';
 import 'models/event.dart';
@@ -59,23 +61,19 @@ extension EnumExtensions on Enum {
   String get humanized => toString().split('.').last;
 }
 
-extension EntitlementItemIdExtension on EntitlementItemId {
+extension PlayerEntitlementIdExtension on PlayerEntitlementId {
   static const ids = [
-    '01bb38e1-da47-4e6a-9b3d-945fe4655707', // agents
-    'f85cb6f7-33e5-4dc8-b609-ec7212301948', // contracts
-    'd5f120f8-ff8c-4aac-92ea-f2b5acbe9475', // sprays
-    'dd3bf334-87f3-40bd-b043-682a57a8dc3a', // gunBuddies
-    '3f296c07-64c3-494c-923b-fe692a4fa1bd', // cards
-    'e7c63390-eda7-46e0-bb7a-a6abdacd2433', // skins
-    '3ad1b2b2-acdb-4524-852f-954a76ddae0a', // skinChromas
-    'de7caa6b-adf7-4588-bbd1-143831e786c6' // titles
+    '01bb38e1-da47-4e6a-9b3d-945fe4655707', //	Agents
+    'f85cb6f7-33e5-4dc8-b609-ec7212301948', // 	Contracts
+    'd5f120f8-ff8c-4aac-92ea-f2b5acbe9475', // 	Sprays
+    'dd3bf334-87f3-40bd-b043-682a57a8dc3a', // 	Gun Buddies
+    '3f296c07-64c3-494c-923b-fe692a4fa1bd', // 	Cards
+    'e7c63390-eda7-46e0-bb7a-a6abdacd2433', // 	Skins
+    '3ad1b2b2-acdb-4524-852f-954a76ddae0a', // 	Skin Variants
+    'de7caa6b-adf7-4588-bbd1-143831e786c6', //
   ];
 
   String get uuid {
     return ids[index];
-  }
-
-  static EntitlementItemId fromString(String str) {
-    return EntitlementItemId.values[ids.indexOf(str)];
   }
 }

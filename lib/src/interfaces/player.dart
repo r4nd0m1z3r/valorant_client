@@ -7,17 +7,61 @@ import '../models/storefront.dart';
 import '../models/user.dart';
 import '../url_manager.dart';
 import '../valorant_client_base.dart';
+import '../extensions.dart';
 
 class PlayerInterface {
   final ValorantClient _client;
 
   PlayerInterface(this._client);
 
-  Future<User?> getPlayer() async {
+  Future<String?> _determineWeaponNameFromOffer(OfferElement offer) async {
+    final skinDataUri =
+        Uri.parse("https://valorant-api.com/v1/weapons/skinlevels/${offer.id}");
+    final skinDataResponse = await _client.executeRawRequest(
+        method: HttpMethod.get, uri: skinDataUri);
+
+    return skinDataResponse['data']['displayName'].split(' ').last;
+  }
+
+  Future<Map<String, List<OfferElement>>?> getOwnedSkins() async {
     final requestUri = Uri.parse(
-      '${UrlManager.getBaseUrlForRegion(_client.userRegion)}/name-service/v2/players',
+        '${UrlManager.getBaseUrlForRegion(_client.userRegion)}/store/v1/entitlements/${_client.userPuuid}/${PlayerEntitlementId.skins.uuid}');
+    final response = await _client.executeRawRequest(
+      method: HttpMethod.get,
+      uri: requestUri,
     );
 
+    if (response == null) {
+      return null;
+    }
+
+    final storeOffers = await getStoreOffers();
+    final entitlements = response['Entitlements'];
+    final Map<String, List<OfferElement>> ownedSkins = {};
+
+    if (storeOffers == null) return null;
+    for (final offer in storeOffers.offerList) {
+      for (final entitlement in entitlements) {
+        if (offer.id == entitlement['ItemID']) {
+          final weaponName = await _determineWeaponNameFromOffer(offer);
+          final weaponSkinsList = ownedSkins[weaponName];
+          if (weaponName != null) {
+            if (weaponSkinsList != null) {
+              weaponSkinsList.add(offer);
+            } else {
+              ownedSkins.putIfAbsent(weaponName, () => [offer]);
+            }
+          }
+        }
+      }
+    }
+
+    return ownedSkins;
+  }
+
+  Future<User?> getPlayer() async {
+    final requestUri = Uri.parse(
+        '${UrlManager.getBaseUrlForRegion(_client.userRegion)}/name-service/v2/players');
     final response = await _client.executeRawRequest(
       method: HttpMethod.put,
       uri: requestUri,
@@ -33,9 +77,7 @@ class PlayerInterface {
 
   Future<Balance?> getBalance() async {
     final requestUri = Uri.parse(
-      '${UrlManager.getBaseUrlForRegion(_client.userRegion)}/store/v1/wallet/${_client.userPuuid}',
-    );
-
+        '${UrlManager.getBaseUrlForRegion(_client.userRegion)}/store/v1/wallet/${_client.userPuuid}');
     final response = await _client.executeRawRequest(
       method: HttpMethod.get,
       uri: requestUri,
@@ -52,17 +94,20 @@ class PlayerInterface {
     final unknownCurrency = points?[CurrencyConstants.unknownCurrency] as int?;
 
     return Balance(
-      valorantPoints: valorantPoints ?? 0,
-      radianitePoints: radianitePoints ?? 0,
-      unknownCurrency: unknownCurrency ?? 0,
+      valorantPoints:
+          (response['Balances'][CurrencyConstants.valorantPointsId] ?? 0)
+              as int,
+      radianitePoints:
+          (response['Balances'][CurrencyConstants.radianitePointsId] ?? 0)
+              as int,
+      unknownCurrency:
+          (response['Balances'][CurrencyConstants.unknownCurrency] ?? 0) as int,
     );
   }
 
   Future<MMR?> getMMR() async {
     final requestUri = Uri.parse(
-      '${UrlManager.getBaseUrlForRegion(_client.userRegion)}/mmr/v1/players/${_client.userPuuid}/competitiveupdates',
-    );
-
+        '${UrlManager.getBaseUrlForRegion(_client.userRegion)}/mmr/v1/players/${_client.userPuuid}/competitiveupdates');
     final response = await _client.executeGenericRequest<MMR>(
       typeResolver: () => MMR(),
       method: HttpMethod.get,
@@ -78,8 +123,7 @@ class PlayerInterface {
 
   Future<Storefront?> getStorefront() async {
     final requestUri = Uri.parse(
-      '${UrlManager.getBaseUrlForRegion(_client.userRegion)}/store/v2/storefront/${_client.userPuuid}',
-    );
+        '${UrlManager.getBaseUrlForRegion(_client.userRegion)}/store/v2/storefront/${_client.userPuuid}');
 
     return await _client.executeGenericRequest<Storefront>(
       typeResolver: () => Storefront(),

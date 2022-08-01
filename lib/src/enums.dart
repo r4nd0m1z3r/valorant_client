@@ -18,7 +18,7 @@ enum CurrencyType {
   unknown,
 }
 
-enum EntitlementItemId {
+enum PlayerEntitlementId {
   agents,
   contracts,
   sprays,

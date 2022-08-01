@@ -7,3 +7,5 @@ export 'src/extensions.dart';
 export 'src/user_details.dart';
 export 'src/valorant_client_base.dart';
 export 'src/models/serializable.dart';
+export 'src/models/offers.dart';
+export 'src/models/asset_id.dart';
