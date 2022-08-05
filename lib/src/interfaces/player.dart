@@ -20,7 +20,9 @@ class PlayerInterface {
     final skinDataResponse = await _client.executeRawRequest(
         method: HttpMethod.get, uri: skinDataUri);
 
-    return skinDataResponse['data']['displayName'].split(' ').last;
+    return skinDataResponse['data']['assetPath'].contains('Melee')
+        ? 'Melee'
+        : skinDataResponse['data']['displayName'].split(' ').last;
   }
 
   Future<Map<String, List<OfferElement>>?> getOwnedSkins() async {
